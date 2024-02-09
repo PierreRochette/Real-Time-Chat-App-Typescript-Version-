@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "@types/react-scroll-to-bottom": "^4.2.4"
+  }
+}
