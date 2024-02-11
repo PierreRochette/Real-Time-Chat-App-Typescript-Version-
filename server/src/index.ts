@@ -1,11 +1,15 @@
 import * as http from 'http';
 import * as socketio from 'socket.io';
+import { connect_database } from './database';
+import { Message } from '../models/Message';
 
 // Creation serveur
 const server = http.createServer((req, res) => {
     res.writeHead(200, {'Content-Type': 'text/plain'});
     res.end('Hello World!\n');
 });
+
+connect_database(); 
 
 // Instanciation socket.io
 const io = new socketio.Server();
@@ -25,11 +29,26 @@ io.on('connection', (socket) => {
     socket.on("join_room", (data) => {
         socket.join(data); 
         console.log(`User with id: ${socket.id} joined room: ${data}`); 
+
+        Message.find({ room: data})
+            .then(messages => {
+                socket.emit("room_history", messages); 
+            })
+            .catch(err => console.error('Error retrieving messages', err)); 
+
     }); 
 
     socket.on("send_message", (data) => {
+
+        const newMessage = new Message(data); 
+        newMessage.save()
+            .then(() => console.log ("Message saved"))
+            .catch(err => console.error("Error saving message", err))
+        
         socket.to(data.room).emit("receive_message", data); 
         console.log(data); 
+
+
     }); 
 
     // Gestion des événements socket

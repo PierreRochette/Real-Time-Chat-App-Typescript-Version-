@@ -47,6 +47,12 @@ const Chat: React.FC<ChatProps> = ({socket, username, room}) => {
         }); 
     }, [socket]); 
 
+    useEffect(() => {
+        socket.off("room_history").on("room_history", (messages) => {
+            setMessageList(messages)
+        }); 
+    }, [socket]); 
+
     return(
 
         <div className="chat-window">
